@@ -57,7 +57,7 @@
 ?>
     <div class="container">
 
-        <form action="login_form_ddbb.php" method="get" id="login_form">
+        <form action="login_form_ddbb.php" method="post" id="login_form">
             <div class="form-group" id="nombre">
                 <label for="Usuario">Usuario</label>
                 <input type="text" class="form-control" name="usuario" placeholder="Introduce tu nombre de Usuario">
@@ -92,123 +92,185 @@
             // establecer el conjunto de caracteres a utf8
             $conexion->set_charset("utf8");
 
-            if( isset($_GET["enviar"]) ) {
+            if( isset($_POST["enviar"]) ) {
 
                 $usuario ="";
                 $passwd = "";
 
                 // #############  LOGIN   #############
-                if ( $_GET["opcion"] == "login" ) {
+                if ( $_POST["opcion"] == "login" ) {
                     //Capturar datos formulario
-                    $usuario = $_GET["usuario"];
-                    $passwd = $_GET["password"];
+                    $usuario = $_POST["usuario"];
+                    $passwd = $_POST["password"];
 
                     // Consulta a la bbdd
                     if ($resultado = $conexion->query("SELECT * from users where username='$usuario'")) {
                         $row = $resultado->fetch_array(MYSQLI_ASSOC);
                         if ( $row['pass']==$passwd ) {
-                            $loginOk = true;
-                            //header("Location: ./login_form_ddbb.php",true,303); 
-                        }
+                            //$loginOk = true;
+                            ?> 
+                            <div class="alert alert-primary text-center" role="alert">
+                                <img src="<?php echo $row['image']; ?>" width="60" />
+                                Bienvenido <?php echo strtoupper($row['username']); ?>
+                            </div>
+                            <form class="form-inline" action="login_form_ddbb.php" method="post" id="modify_form">
+                                <input type="hidden" value="<?php echo $usuario; ?>" name="usuario" />
+                                <input class="form-control mr-sm-2" type="text" placeholder="Nuevo nombre" name="n_usuario">
+                                <input class="form-control mr-sm-2" type="password" placeholder="Nuevo password" name="n_password">
+                                <input class="form-control mr-sm-2" type="password" placeholder="Repite el password" name="n_password2">
+                                <input class="btn btn-outline-success my-2 my-sm-0" type="submit" name="modificar" value="modificar">
+                            </form>
+                    <?php } else { ?>
+                            <div class="alert alert-danger text-center" role="alert">
+                                El usuario o la contraseña son erróneos
+                            </div>
+                    <?php }
                         // liberar el conjunto de resultados
                         $resultado->free();
                     }
 
                 // #############  LISTAR   #############
-                } else if( $_GET["opcion"] == "listar" ) {
-
-                    // Consulta a la bbdd
+                } else if( $_POST["opcion"] == "listar" ) {
                     if ($resultado = $conexion->query("SELECT * from users")) {
-                        $lista_usuarios = "<form action='login_form_ddbb.php' method='get'>";
+                        $lista_usuarios = "<form action='login_form_ddbb.php' method='post'>";
                         while( $row = $resultado->fetch_array(MYSQLI_ASSOC) ) {
                             $lista_usuarios .= "<p><img src='". $row["image"] . "' width='60'>" . $row["username"] . "<button id='eliminar' type='submit' name='eliminar' value='".$row["id"]."'>&#10008;</button></p>";
                         }
-                        $lista_usuarios .= "</form>";
+                        $lista_usuarios .= "</form>"; ?>
+                        <div class="alert alert-primary lista-usuarios" role="alert">
+                            <p style="text-decoration:underline">USUARIOS:</p>
+                            <?php echo $lista_usuarios; ?>
+                        </div>
+                    <?php 
                         $resultado->free();
-                        $listar = true;
+                        // $listar = true;
                     }
 
                 // #############  REGISTRAR   #############
-                } else if( $_GET["opcion"] == "nuevo" ) {
-                    $usuario = $_GET["usuario"];
-                    $passwd = $_GET["password"];
-                    $imagen = $_GET["imagen"];
+                } else if( $_POST["opcion"] == "nuevo" ) {
+                    $usuario = $_POST["usuario"];
+                    $passwd = $_POST["password"];
+                    $imagen = $_POST["imagen"];
 
                     if( ($usuario && $passwd && $imagen) != null ) {
                         if( !$conexion->query("insert into users values (null,'$usuario','$passwd','$imagen')") ) {
                             echo "Falló la creación del registro: (" . $conexion->errno . ") " . $conexion->error;
-                        }else {
-                            $registro = true;
-                        }                        
-                    }
+                        }else { ?>
+                            <div class="alert alert-primary text-center" role="alert">
+                                Registro realizado con éxito!
+                            </div>    
+                <?php   }                        
+                    } else { ?>
+                        <div class="alert alert-danger text-center" role="alert">
+                            No has rellenado todos los campos
+                        </div>
+                <?php }
                 }
-                //$conexion->close();
+                $conexion->close();
             } // Fin "Enviar"
 
             // #############  MODIFICAR   #############
-            if( isset($_GET["modificar"]) ) {
-                $usuario = $_GET["usuario"];
-                $n_usuario = $_GET["n_usuario"];
-                $n_passwd = $_GET["n_password"];
-                if( ($n_usuario && $n_passwd) != null ) {
+            if( isset($_POST["modificar"]) ) {
+                $usuario = $_POST["usuario"];
+                $n_usuario = $_POST["n_usuario"];
+                $n_passwd = $_POST["n_password"];
+                $n_passwd2 = $_POST["n_password2"];
+                if( ($n_usuario && $n_passwd) != null && $n_passwd == $n_passwd2 ) {
                     if( !$conexion->query("UPDATE users SET username='$n_usuario', pass='$n_passwd' WHERE username='$usuario'") ) {
                         echo "Falló la creación del registro: (" . $conexion->errno . ") " . $conexion->error;
-                    }else {
-                        $modificado = true;
-                    }
-                }
+                    }else { ?>
+                        <div class="alert alert-primary text-center" role="alert">
+                            Usuario modificado con éxito
+                        </div>
+            <?php   }
+                } else { ?>
+                    <div class="alert alert-danger text-center" role="alert">
+                        Error: no ha introducido los datos correctamente
+                    </div>
+            <?php }
+                $conexion->close();
             }
 
             // #############  ELIMINAR   #############
-            if( isset($_GET["eliminar"]) ) {
-                if( !$conexion->query("DELETE FROM users WHERE id = '$_GET[eliminar]'") ) {
+            if( isset($_POST["eliminar"]) ) {
+                if( !$conexion->query("DELETE FROM users WHERE id = '$_POST[eliminar]'") ) {
                         echo "Falló la creación del registro: (" . $conexion->errno . ") " . $conexion->error;
-                }else {
-                    $eliminado = true;
-                }
+                }else { ?>
+                    <div class="alert alert-primary text-center" role="alert">
+                        Usuario eliminado con éxito
+                    </div>
+            <?php }
             }
         ?>
 
         <!-- ####### RESULTADOS ######### -->
+        <?php if ( isset($_POST["enviar"]) ) { ?>
+   
+            <!-- LOGIN -->
+            <?php  if ( $_POST["opcion"] == "login" && $loginOk ) { ?>
+                <!-- <div class="alert alert-primary text-center" role="alert">
+                    <img src="<?php //echo $row['image']; ?>" width="60" />
+                    Bienvenido <?php //echo strtoupper($row['username']); ?>
+                </div>
+                <form class="form-inline" action="login_form_ddbb.php" method="post" id="modify_form">
+                    <input type="hidden" value="<?php //echo $usuario; ?>" name="usuario" />
+                    <input class="form-control mr-sm-2" type="text" placeholder="Nuevo nombre" name="n_usuario">
+                    <input class="form-control mr-sm-2" type="password" placeholder="Nuevo password" name="n_password">
+                    <input class="form-control mr-sm-2" type="password" placeholder="Repite el password" name="n_password2">
+                    <input class="btn btn-outline-success my-2 my-sm-0" type="submit" name="modificar" value="modificar">
+                </form> -->
+            <?php
+                } else if ( $_POST["opcion"] == "login" && !$loginOk ) { 
+            ?>
+                <!-- <div class="alert alert-danger text-center" role="alert">
+                    El usuario o la contraseña son erróneos
+                </div> -->
 
-        <?php  if ( $loginOk ) { ?>
-            <div class="alert alert-primary text-center" role="alert">
-                <img src="<?php echo $row['image']; ?>" width="60" />
-                Bienvenido <?php echo strtoupper($row['username']); ?>
-            </div>
-            <form class="form-inline" action="login_form_ddbb.php" method="get" id="modify_form">
-                <input type="hidden" value="<?php echo $usuario; ?>" name="usuario" />
-                <input class="form-control mr-sm-2" type="text" placeholder="Nuevo nombre" name="n_usuario">
-                <input class="form-control mr-sm-2" type="password" placeholder="Nuevo password" name="n_password">
-                <input class="btn btn-outline-success my-2 my-sm-0" type="submit" name="modificar" value="Modificar">
-            </form>
-            <!-- <input type="reset" value="reset">Salir -->
-        <?php
-               } else if ( !$loginOk && !$listar && !$registro && isset($_GET["enviar"]) ) { 
-        ?>
-            <div class="alert alert-danger text-center" role="alert">
-                El usuario o la contraseña son erróneos
-            </div>
-        <?php } else if ( $listar ) { 
-        ?>
-            <div class="alert alert-primary lista-usuarios" role="alert">
-                <p style="text-decoration:underline">USUARIOS:</p>
-                <?php echo $lista_usuarios; ?>
-            </div>
-        <?php } else if ( $registro ) { ?>
-            <div class="alert alert-primary text-center" role="alert">
-                Registro realizado con éxito!
-            </div>
-        <?php } else if ( isset($_GET["enviar"]) && !$registro ) { ?>
-            <div class="alert alert-danger text-center" role="alert">
-                No has rellenado todos los campos
-            </div>
-        <?php } else if ( $eliminado ) { ?>
-            <div class="alert alert-primary text-center" role="alert">
-                Usuario eliminado con éxito
-            </div>
-        <?php } ?>
+                <!-- LISTAR -->
+            <?php } else if ( $_POST["opcion"] == "listar" && $listar ) { ?>
+                <!-- <div class="alert alert-primary lista-usuarios" role="alert">
+                    <p style="text-decoration:underline">USUARIOS:</p>
+                    <?php //echo $lista_usuarios; ?>
+                </div> -->
 
+                <!-- REGISTRAR -->
+            <?php } else if ( $_POST["opcion"] == "registrar" && $registro ) { ?>
+                <!-- <div class="alert alert-primary text-center" role="alert">
+                    Registro realizado con éxito!
+                </div> -->
+            <?php } else if ( $_POST["opcion"] == "registrar" && !$registro ) { ?>
+                <!-- <div class="alert alert-danger text-center" role="alert">
+                    No has rellenado todos los campos
+                </div> -->
+            <?php } 
+        } // endif "enviar";
+
+        // MODIFICAR
+        else if ( isset($_POST["modificar"]) ) { ?>
+            <?php if ($modificado) { ?>
+                <!-- <div class="alert alert-primary text-center" role="alert">
+                    Usuario modificado con éxito
+                </div> -->
+            <?php
+                } else { 
+            ?>
+                <!-- <div class="alert alert-danger text-center" role="alert">
+                    Error: no ha introducido los datos correctamente
+                </div> -->
+            <?php } 
+        } //endif "modificar"
+
+        // ELIMINAR
+        else if ( isset($_POST["eliminar"]) ) { ?>
+            <?php if ($eliminado) { ?>
+                <!-- <div class="alert alert-primary text-center" role="alert">
+                    Usuario eliminado con éxito
+                </div> -->
+            <?php
+                } 
+        } //endif "modificar"
+        ?>
+        
     </div>
 
     <script>
