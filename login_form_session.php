@@ -31,8 +31,8 @@ session_start();
       $user = ["admin","user1","user2","user3","user4","user5"];
       $pass = ["1234","1111","2222","3333","4444","5555"];
       $error = false; // no coinciden usuario y contraseña
-      $_SESSION['login'] = false;
-      $_SESSION['usuario'] = ""; //usuario logeado
+      $_SESSION['login'] = null; // Sesión iniciada
+      $_SESSION['usuario'] = null; //usuario logeado
       if( !isset($_SESSION['login']) ) {
     ?>
       <form action="login_form_session.php" method="post">
@@ -61,17 +61,19 @@ session_start();
                     }
                 }
             }
-            if( !isset($_SESSION['login']) ) $error = true;
+            if( !isset($_SESSION['login']) ) $error = true; // No coinciden usuario y pass
         }
-        if( isset($_POST['cerrar']) ) unset($_SESSION['login']); //session_destroy(); 
+        // Cerrar sesión
+        if( isset($_POST['cerrar']) ) session_destroy(); 
         
+        // Mensaje de bienvenida
         if ( isset($_SESSION['login']) && isset($_SESSION['usuario']) ) {    
       ?>
         <div class="alert alert-primary text-center" role="alert">
             Te has logueado como "<?php echo strtoupper($_SESSION['usuario']); ?>"
         </div>
         <form action="login_form_session.php" method="post">
-            <button type="submit" class="btn btn-primary" name="cerrar">Cerrar sesión</button>
+            <button type="submit" class="btn btn-warning btn-sm" name="cerrar">Cerrar sesión</button>
         </form>
       <?php
         }
@@ -82,15 +84,6 @@ session_start();
         </div>
       <?php
         }
-        elseif ( !isset($_SESSION['login']) ) { ?>
-
-        <div class="alert alert-warning text-center" role="alert">
-            Aún no te has logueado
-        </div>
-
-      <?php 
-        }
-  
       ?>
 
     </div>
