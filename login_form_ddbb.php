@@ -48,13 +48,6 @@
 </head>
 <body>
 
-<?php //Variables de inicio
-        $loginOk = false;
-        $listar = false;
-        $registro = false;
-        $modificado = false;
-        $eliminado = false;
-?>
     <div class="container">
 
         <form action="login_form_ddbb.php" method="post" id="login_form">
@@ -202,75 +195,7 @@
             <?php }
             }
         ?>
-
-        <!-- ####### RESULTADOS ######### -->
-        <?php if ( isset($_POST["enviar"]) ) { ?>
-   
-            <!-- LOGIN -->
-            <?php  if ( $_POST["opcion"] == "login" && $loginOk ) { ?>
-                <!-- <div class="alert alert-primary text-center" role="alert">
-                    <img src="<?php //echo $row['image']; ?>" width="60" />
-                    Bienvenido <?php //echo strtoupper($row['username']); ?>
-                </div>
-                <form class="form-inline" action="login_form_ddbb.php" method="post" id="modify_form">
-                    <input type="hidden" value="<?php //echo $usuario; ?>" name="usuario" />
-                    <input class="form-control mr-sm-2" type="text" placeholder="Nuevo nombre" name="n_usuario">
-                    <input class="form-control mr-sm-2" type="password" placeholder="Nuevo password" name="n_password">
-                    <input class="form-control mr-sm-2" type="password" placeholder="Repite el password" name="n_password2">
-                    <input class="btn btn-outline-success my-2 my-sm-0" type="submit" name="modificar" value="modificar">
-                </form> -->
-            <?php
-                } else if ( $_POST["opcion"] == "login" && !$loginOk ) { 
-            ?>
-                <!-- <div class="alert alert-danger text-center" role="alert">
-                    El usuario o la contraseña son erróneos
-                </div> -->
-
-                <!-- LISTAR -->
-            <?php } else if ( $_POST["opcion"] == "listar" && $listar ) { ?>
-                <!-- <div class="alert alert-primary lista-usuarios" role="alert">
-                    <p style="text-decoration:underline">USUARIOS:</p>
-                    <?php //echo $lista_usuarios; ?>
-                </div> -->
-
-                <!-- REGISTRAR -->
-            <?php } else if ( $_POST["opcion"] == "registrar" && $registro ) { ?>
-                <!-- <div class="alert alert-primary text-center" role="alert">
-                    Registro realizado con éxito!
-                </div> -->
-            <?php } else if ( $_POST["opcion"] == "registrar" && !$registro ) { ?>
-                <!-- <div class="alert alert-danger text-center" role="alert">
-                    No has rellenado todos los campos
-                </div> -->
-            <?php } 
-        } // endif "enviar";
-
-        // MODIFICAR
-        else if ( isset($_POST["modificar"]) ) { ?>
-            <?php if ($modificado) { ?>
-                <!-- <div class="alert alert-primary text-center" role="alert">
-                    Usuario modificado con éxito
-                </div> -->
-            <?php
-                } else { 
-            ?>
-                <!-- <div class="alert alert-danger text-center" role="alert">
-                    Error: no ha introducido los datos correctamente
-                </div> -->
-            <?php } 
-        } //endif "modificar"
-
-        // ELIMINAR
-        else if ( isset($_POST["eliminar"]) ) { ?>
-            <?php if ($eliminado) { ?>
-                <!-- <div class="alert alert-primary text-center" role="alert">
-                    Usuario eliminado con éxito
-                </div> -->
-            <?php
-                } 
-        } //endif "modificar"
-        ?>
-        
+       
     </div>
 
     <script>
