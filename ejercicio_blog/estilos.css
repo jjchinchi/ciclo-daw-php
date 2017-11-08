@@ -7,3 +7,6 @@ button[type=submit] {
 h3 {
   margin-bottom: 30px !important;
 }
+form#comentarios {
+  width: 350px;
+}
