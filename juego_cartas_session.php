@@ -23,8 +23,9 @@ session_start();
     a {
       color: black;
     }
-    a[type=submit] {
-      -webkit-appearance: inherit;
+    button[type=submit] {
+      background: none;
+      border: none;
     }
     a:hover {
       text-decoration:none;
@@ -48,50 +49,67 @@ session_start();
 <body>
 <?php 
   $array_inicial = ["fa-camera-retro","fa-camera-retro","fa-futbol-o","fa-futbol-o","fa-umbrella","fa-umbrella"];
-  $_SESSION['array_inicial'] = [];
+  //$_SESSION['array_inicial'] = [];
 
-  // Si no se ha iniciado el juego crear el array de la sesión:
+  if ( isset($_GET['select1']) ) {
+    $_SESSION["carta1"] = $_GET['select1'];
+    //$_GET['select1'] = null;
+  } 
+  elseif ( isset($_GET['select2']) ) {
+    $_SESSION["carta2"] = $_GET['select2'];
+    //$_GET['select2'] = null;
+  }
+
+  // Si no se ha iniciado el juego barajar el array de cartas:
   if( !isset($_SESSION["carta1"]) ) {
     shuffle($array_inicial);
     for($i=0; $i<count($array_inicial); $i++) {
-      $_SESSION['array_inicial'][$i] = $array_inicial[$i];
+      $_SESSION['array_inicial'][$i] = $array_inicial[$i] . "$i";
     }
   }
+/*   print_r($array_inicial);
+  echo "<br>"; */
+  print_r($_SESSION['array_inicial']);
+  
 
-  $_SESSION["carta1"] = null;
-  $_SESSION["carta2"] = null;
-  $id = isset($_POST['select']) ? $_POST['select'] : null;
-  /* $_SESSION["c1"] = null;
-  $_SESSION["a2"] = null;
-  $_SESSION["b2"] = null;
-  $_SESSION["c2"] = null; */
+  //$id = isset($_GET['select']) ? $_GET['select'] : null;
+  echo("<br/>carta1: " . $_SESSION["carta1"]);
+  echo("<br/>carta2: " . $_SESSION["carta2"]);
+
+  if( isset($_GET['restart']) ) {
+    unset($_SESSION["carta1"]);
+    unset($_SESSION["carta2"]);
+  }
+
+  $name = isset($_GET['select1']) ? "2" : "1";
+
 ?>
   <div class="container text-center">
-    <h1 class="display-4">Encuentra las parejas!</h1>
 
-    <form action="juego_cartas_session.php" method="post">
-      <?php for( $i=0; $i<2; $i++ ) { ?>
+    <h1 class="display-4">Encuentra las parejas!</h1>
+    <form action="juego_cartas_session.php" method="get">
       <div class="row">
-        <?php for( $j=0; $j<3; $j++ ) { ?>
+        <?php for( $i=0; $i<count($array_inicial); $i++ ) { ?>
           <div class="col">
-          <?php if ( $id != $_SESSION['aray_inicial'][$j] ) { ?>
-            <a href="juego_cartas_session.php" type="submit" name="select" value="<?php echo $_SESSION['aray_inicial'][$j]; ?>">
-              <i class="fa fa-square fa-5x"></i>
-            </a>
+          <?php echo "<script>console.log('".$_SESSION["carta1"] . " | " . $_SESSION["carta2"] . " - " . $_SESSION['array_inicial'][$i]."')</script>"; ?>
+          <?php if ( $_SESSION["carta1"] == $_SESSION['array_inicial'][$i] || $_SESSION["carta2"] == $_SESSION['array_inicial'][$i] ) { ?>
+            <i class="fa <?php echo $array_inicial[$i]; ?> fa-5x"></i>
           <?php }else{ ?>
-            <i class="fa <?php echo $_SESSION['aray_inicial'][$j]; ?> fa-5x"></i>
+            <button type="submit" name="select<?php echo $name; ?>" value="<?php echo $_SESSION['array_inicial'][$i]; ?>">
+              <i class="fa fa-square fa-5x"></i><?php echo $_SESSION['array_inicial'][$i]; ?>
+            </button>
           <?php } ?>
           </div>
           <!-- Genera nueva "row" -->
-          <?php if ( $j == 2 ) { ?> </div><div class="row"> <?php } ?>
-        <?php } //for $j ?>
+          <?php if ( $i == 2 ) { ?> </div><div class="row"> <?php } ?>
+        <?php } //for $i ?>
       </div>
-      <?php } //for $i ?>
+      <button type="submit" name="restart"> Reload </button>
     </form>
 
   <?php
   /* $gameOver="";
-  if( isset($_POST['id']) ) {
+  if( isset($_GET['id']) ) {
     if( $id=="af" || $id=="fa" || $id=="be" || $id=="eb" || $id=="cd" || $id=="dc") {
       $gameOver = "<span class='text-success'>Ganaste!</span>";
     } elseif( strlen($id) > 1 ) {
@@ -106,3 +124,4 @@ session_start();
   
 </body>
 </html>
+<i class="fa <?php echo $_SESSION['array_inicial'][$i]; ?> fa-5x"></i>
