@@ -1,0 +1,18 @@
+div.container {
+  margin-top: 50px;
+}
+.col h3 {
+    width: 70%;
+    border-bottom: 3px solid black;
+    margin-bottom: 20px;
+}
+#index .col form {
+  width: 50%;
+}
+div.registro {
+  margin-top: 20px;
+  text-align: center;
+}
+button[name=logout] {
+  cursor:pointer;
+}
